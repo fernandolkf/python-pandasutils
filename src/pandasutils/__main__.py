@@ -10,9 +10,7 @@ Why does this file exist, and why __main__? For more info, read:
 """
 import sys
 
-from pandasutils.cli import main
-from pandasutils.cli import format_columns_name
-from pandasutils.cli import print_value_counts
+from pandasutils.cli import main, format_columns_name, print_value_counts
 
 if __name__ == "__main__":
     sys.exit(main())
