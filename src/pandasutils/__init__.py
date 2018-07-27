@@ -1,6 +1,6 @@
 __version__ = '0.2.1.0'
 
-import __main__
+from pandasutils.cli import main, format_columns_name, print_value_counts
 
 #Major
 #Minor
