@@ -42,12 +42,10 @@ def print_value_counts(df_data, label, msg='{} : {} ({:.2f})', limit=None):
     """
     Function to print the result of a value counts of a DataFrame
     Args:
-        df_data: a DataFrame object
-        label: the
-        msg:
-        limit:
-
-    Returns:
+        df_data: a DataFrame object 
+        label: the label of 
+        msg: the print mensage
+        limit: limit the unique values
 
     """
     if not isinstance(df_data, pd.DataFrame):
@@ -60,6 +58,31 @@ def print_value_counts(df_data, label, msg='{} : {} ({:.2f})', limit=None):
         percentage=lambda x: 100 * x['count'] / x['count'].sum()).assign(total=lambda x: x['count'].sum()).head(
         limit).apply(lambda x: print(msg.format(x['index'], x['count'], x['percentage'])), axis=1)
 
+
+def get_field_from_df(data, label, field, df_get_data, return_first_value=True, null_return=None):
+    """
+    Function to print the result of a value counts of a DataFrame
+    Args:
+        data: data to search on DataFrame
+        label: the x label to compare
+        field: the field to return
+        df_get_data: dataframe to get value
+	return_first_value: boolean to return the first value or all values from DataFrame
+	null_return: Value to return if there is no value
+
+    Returns:
+	the data from DataFrame
+
+    """
+    try:
+        if return_first_value:
+            return df_get_data.loc[df_get_data[label]==data,field].values[0]
+
+        else:
+            return df_get_data.loc[df_get_data[label]==data,field].values
+
+    except Exception as e:
+        return null_return
 
 def main(argv=sys.argv):
     """
