@@ -33,7 +33,7 @@ def format_columns_name(df_data):
         raise TypeError('df_data should be instance of {}'.format(pd.DataFrame))
 
     df_data = df_data.copy()
-    df_data.columns = [unidecode(x).lower().strip().replace(' ', '_') for x in df_data.columns]
+    df_data.columns = [unidecode(str(x)).lower().strip().replace(' ', '_') for x in df_data.columns]
 
     return df_data
 
