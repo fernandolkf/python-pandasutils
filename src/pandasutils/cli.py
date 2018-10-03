@@ -51,9 +51,9 @@ def print_value_counts(df_data, field, msg='{} : {} ({:.2f}%)', limit=None):
         raise TypeError('df_data should be instance of {}'.format(pd.DataFrame))
 
     if not limit:
-        limit = df_data[label].unique().size
+        limit = df_data[field].unique().size
 
-    df_data[label].value_counts().reset_index(name='count').assign(
+    df_data[field].value_counts().reset_index(name='count').assign(
         percentage=lambda x: 100 * x['count'] / x['count'].sum()).assign(total=lambda x: x['count'].sum()).head(
         limit).apply(lambda x: print(msg.format(x['index'], x['count'], x['percentage'])), axis=1)
 
