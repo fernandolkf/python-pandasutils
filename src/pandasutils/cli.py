@@ -161,8 +161,7 @@ def multiprocessing_apply(df_data, function, **kwargs):
     if verbose:
         print('Mapping process')
     try:
-        res = pool.map(_apply_function, [(df, function, kwargs)
-                             the print mensage            for df in df_list])
+        res = pool.map(_apply_function, [(df, function, kwargs) for df in df_list])
         pool.close()
         return pd.concat(list(res))
     except Exception as e:
