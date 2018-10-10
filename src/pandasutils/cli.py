@@ -35,7 +35,7 @@ def format_columns_name(df_data):
     return df_data
 
 
-def print_value_counts(df_data, field, msg='{} : {} ({:.2f}%)', limit=None):
+def print_value_counts(df_data, field, msg='{index} : {count} ({percentage:.2f}%)', limit=None):
     """
     Print the result of a value counts of a DataFrame on a format message
     
@@ -43,7 +43,7 @@ def print_value_counts(df_data, field, msg='{} : {} ({:.2f}%)', limit=None):
  |  ----------
         df_data (DataFrmae): Original data to print values
         field (String): the label of
-        msg (String): the message to print in format {key} {count} {percentage}
+        msg (String): the message to print in format {index} {count} {percentage}
         limit (int): Max number of unique values to print (if is too long)
 
     """
@@ -55,7 +55,7 @@ def print_value_counts(df_data, field, msg='{} : {} ({:.2f}%)', limit=None):
 
     df_data[field].value_counts().reset_index(name='count').assign(
         percentage=lambda x: 100 * x['count'] / x['count'].sum()).assign(total=lambda x: x['count'].sum()).head(
-        limit).apply(lambda x: print(msg.format(x['index'], x['count'], x['percentage'])), axis=1)
+        limit).apply(lambda x: print(msg.format(index=x['index'], count=x['count'], percentage=x['percentage'])), axis=1)
 
 
 def get_field_from_df(value, value_field, return_field, df_data, return_first_value=True, null_return=None):
