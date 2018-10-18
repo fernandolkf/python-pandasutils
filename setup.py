@@ -66,6 +66,8 @@ setup(
     ],
     install_requires=[
         # eg: 'aspectlib==1.1.1', 'six>=1.7',
+        'numpy>=1.12', 'Unidecode==1.0.22', 'setuptools==40.4.3', 'requests==2.19.1',
+        'Jinja2==2.10', 'pandas>=0.20.3'
     ],
     extras_require={
         # eg:
