@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name='pandasutils',
-    version='0.6.0',
+    version='0.6.1',
     license='BSD 2-Clause License',
     description='A collection of functions and tools do deal with transformations and tricks on pandas library',
     long_description='%s\n%s' % (
