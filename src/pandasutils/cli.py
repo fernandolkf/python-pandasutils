@@ -296,6 +296,135 @@ def split_unique(df_data, field):
         
     return df_split
 
+def _mem_usage(pandas_obj, as_string=True):
+    """
+    Check total amount of memory used by a pandas object
+    Based on https://www.dataquest.io/blog/pandas-big-data/
+    Parameters
+    ----------
+    pandas_obj : pandas Object
+        A pandas object to check size
+    as_string : boolean (default True):
+        Return as a formated string or as the number of bytes of object 
+
+    Returns
+    -------
+    usage :  String or int
+        The amount of memory allocated by the object
+
+    """
+    
+    if isinstance(pandas_obj,pd.DataFrame):
+        usage_b = pandas_obj.memory_usage(deep=True).sum()
+    else: # we assume if not a df it's a series
+        usage_b = pandas_obj.memory_usage(deep=True)
+    
+    usage_mb = usage_b / 1024 ** 2 # convert bytes to megabytes
+    if as_string:
+        return "{:03.2f} MB".format(usage_mb)
+    
+    return usage_b
+
+def reduce_dataframe_size(df_data, infer_types=True, int_columns = None, float_columns=None, boolean_columns = None, 
+                          categorical_columns = None, category_unique_percentage=0.5, category_null = True,
+                          date_columns = None, date_format='%Y-%m-%d', verbose=True):
+    
+    """
+    Reduce the size of a pandas DataFrame by changing the columns type format
+    Based on https://www.dataquest.io/blog/pandas-big-data/
+
+    Parameters
+    ----------
+    df_data : pandas DataFrame 
+        The original DataFrame to reduce size
+    infer_types : boolean (default True)
+        Infer columns types
+    int_columns : list (default None)
+        List of int columns to reduce memory size
+    float_columns : list (default None) 
+        List of float columns to reduce memory size
+    boolean_columns : list (default None)
+        List of boolean columns to reduce memory size
+    categorical_columns : list (default None)
+        List of categorical columns to reduce memory size
+    category_unique_percentage : float (default 0.5)
+        Max percentage of unique values to set object type to category
+    category_null : boolean (default True)
+        Include null values to check for category total size
+    date_columns : list (default None)
+        List of date columns to reduce memory size
+    date_format : String (defailt '%Y-%m-%d')
+        Format of date values
+    verbose : boolean (default True)
+        Print status
+
+    Returns
+    -------
+    df_reduced : pandas DataFrame
+        A new DataFrame with reduced size
+    """
+    
+    df_reduced = pd.DataFrame()
+    if verbose:
+        print('Initial DataFrame size: {}'.format(_mem_usage(df_data)))
+        
+    
+    if infer_types:
+        
+        if int_columns is None:
+            int_columns = list(df_data.select_dtypes(include=['int']).columns)
+            
+        if float_columns is None:
+            float_columns = list(df_data.select_dtypes(include=['float']).columns)
+    
+    if int_columns:
+        df_reduced[int_columns] = df_data[int_columns].apply(pd.to_numeric,downcast='unsigned')
+    
+    if float_columns:
+        df_reduced[float_columns] = df_data[float_columns].apply(pd.to_numeric,downcast='float')
+    
+    if boolean_columns:
+        boolean_map = {1:True, '1':True, 'True':True, '0':False, 0:False, 'False':False, np.nan:False, False:False, True:True}
+        df_reduced[boolean_columns] = df_data[boolean_columns].fillna(False).apply(lambda x: x.map(boolean_map))
+        
+        for col in [c for c in df_reduced[boolean_columns].columns if df_reduced[c].dtype!=bool]:
+            
+            if verbose:
+                print('Failed to format {col} to boolean column ({unique})'.format(col=col, unique=list(df_data[col].unique())))
+                
+            df_reduced[col] = df_data[col]
+            
+    if date_columns:
+        df_reduced[date_columns] = df_data[date_columns].apply(lambda x: pd.to_datetime(x, format=date_format, errors='coerce'))
+        
+        
+    if infer_types and categorical_columns is None:
+        categorical_columns = [x for x in df_data.columns if df_data[x].dtype==object]
+        
+    for cat in categorical_columns:
+        num_unique_values = df_data[cat].unique().size
+        
+        if category_null:
+            num_total_values = df_data[cat].shape[0]
+        else:
+            num_total_values = df_data[cat].notnull().sum()
+        
+        if num_unique_values / num_total_values < category_unique_percentage:
+            df_reduced[cat] = df_data[cat].astype('category')
+        
+    fault_columns = [x for x in df_data.columns if x not in df_reduced.columns]
+    
+    if fault_columns:
+        df_reduced[fault_columns] = df_data[fault_columns]
+            
+    if verbose:
+        mem_original = _mem_usage(df_data, as_string=False)
+        mem_final = _mem_usage(df_reduced, as_string=False)
+        print('Final DataFrame size: {} ({:.2f}% reduction)'.format(_mem_usage(df_reduced), 100*(1-(mem_final/mem_original))))
+        
+    return df_reduced 
+
+
 
 def main(argv=sys.argv):
  
